@@ -72,6 +72,42 @@ namespace myVector {
             first -= second;
             return first;
         }
+
+        //implement scalar multiplication/division and dot product
+
+        Vector& operator*=(const T value) {
+            for (size_t i = 0; i < size; i++) this->data[i] *= value;
+            return *this;
+        }
+        friend Vector operator*(Vector first, const T& value) {
+            first *= value;
+            return first;
+        }
+        friend Vector operator*(const T& value, Vector first) {
+            first *= value;
+            return first;
+        }
+
+        friend T operator*(const Vector& first, const Vector& second) {
+            if (first.size != second.size) throw invalid_argument("Unequal lengths");
+            T result = T();
+            for (size_t i = 0; i < first.size; ++i) result += first[i] * second[i];
+            return result;
+        }
+
+        Vector& operator/=(const T value) {
+            if (abs(value) < EPS) { throw std::invalid_argument("The denominator must not be equal to 0!"); }
+            for (size_t i = 0; i < size; i++) {
+                data[i] /= value;
+            }
+            return *this;
+        }
+
+        friend Vector operator/(Vector first, const T& value) {
+            first /= value;
+            return first;
+        }
+
     };
 
     template<typename T>
@@ -89,13 +125,10 @@ int main() {
     myVector::Vector<double> v1(3, arr1);
     myVector::Vector<double> v2(3, arr2);
 
-    cout << "v1: " << v1;
-    cout << "v2: " << v2;
-    cout << "v1 + v2 = " << (v1 + v2);
-    cout << "v1 - v2 = " << (v1 - v2);
-
-    v1 += v2;
-    cout << "After v1 += v2: " << v1;
+    cout << "v1 * 2.0 = " << (v1 * 2.0);
+    cout << "3.0 * v1 = " << (3.0 * v1);
+    cout << "v1 / 2.0 = " << (v1 / 2.0);
+    cout << "Dot product v1 * v2 = " << (v1 * v2) << endl;
 
     return 0;
 }
