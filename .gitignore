@@ -32,6 +32,20 @@
 *.a
 *.lib
 
+
+/
+*
+
+!/Lab1/
+
+!/Lab1/main.cpp
+
+.vs/git
+x64/
+Debug/
+Release/
+
+
 # Executables
 *.exe
 *.out
@@ -39,3 +53,4 @@
 
 # debug information files
 *.dwo
+
