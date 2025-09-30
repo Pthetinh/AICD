@@ -50,6 +50,28 @@ namespace myVector {
 
         template<typename U>
         friend std::ostream& operator<<(std::ostream& os, const Vector<U>& v);
+
+        //add arithmetic operators (+, -, +=, -=) for Vector class
+
+        Vector& operator+=(const Vector& other) {
+            if (size != other.size) throw invalid_argument("Unequal lengths");
+            for (size_t i = 0; i < size; ++i) data[i] += other.data[i];
+            return *this;
+        }
+        friend Vector operator+(Vector first, const Vector& second) {
+            first += second;
+            return first;
+        }
+
+        Vector& operator-=(const Vector& other) {
+            if (size != other.size) throw invalid_argument("Unequal lengths");
+            for (size_t i = 0; i < size; ++i) data[i] -= other.data[i];
+            return *this;
+        }
+        friend Vector operator-(Vector first, const Vector& second) {
+            first -= second;
+            return first;
+        }
     };
 
     template<typename T>
@@ -62,9 +84,18 @@ namespace myVector {
 }
 
 int main() {
-    double arr[] = { 1.0, 2.0, 3.0 };
-    myVector::Vector<double> v(3, arr);
-    cout << "Vector: " << v;
-    cout << "v[0] = " << v[0] << ", v[1] = " << v[1] << ", v[2] = " << v[2] << endl;
+    double arr1[] = { 1.0, 2.0, 3.0 };
+    double arr2[] = { 4.0, 5.0, 6.0 };
+    myVector::Vector<double> v1(3, arr1);
+    myVector::Vector<double> v2(3, arr2);
+
+    cout << "v1: " << v1;
+    cout << "v2: " << v2;
+    cout << "v1 + v2 = " << (v1 + v2);
+    cout << "v1 - v2 = " << (v1 - v2);
+
+    v1 += v2;
+    cout << "After v1 += v2: " << v1;
+
     return 0;
 }
