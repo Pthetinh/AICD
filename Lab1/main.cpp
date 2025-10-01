@@ -181,10 +181,9 @@ namespace myVector {
                 data[i] = fillValue;
             }
         }
-        // SỬA THÀNH:
         Vector(size_t n, T minValue, T maxValue) : data(new std::complex<T>[n]), size(n) {
             std::random_device rd;
-            std::mt19937 gen(rd());  // Đổi 're' thành 'gen'
+            std::mt19937 gen(rd());  
             std::uniform_real_distribution<T> dist(minValue, maxValue);
             for (size_t i = 0; i < size; i++) {
                 data[i] = std::complex<T>(dist(gen), dist(gen));
