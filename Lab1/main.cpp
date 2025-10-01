@@ -237,7 +237,21 @@ namespace myVector {
             return sqrt(abs(sum));
         }
 
-        size_t getSize() const { return size; }
+        size_t getSize() const {
+            return size;
+        }
+
+        Vector normalize() const {
+            double n = norm();
+            if (n < EPS) {
+                throw std::invalid_argument("Cannot normalize zero vector");
+            }
+            Vector result(size);
+            for (size_t i = 0; i < size; i++) {
+                result[i] = data[i] / n;
+            }
+            return result;
+        }
 
         template<typename U>
         friend std::ostream& operator<<(std::ostream& os, const Vector<std::complex<U>>& v);
@@ -254,17 +268,43 @@ namespace myVector {
     }
 }
 
+template<typename T>
+myVector::Vector<T> vectorBisector(const myVector::Vector<T>& a, const myVector::Vector<T>& b) {
+    if (a.getSize() != b.getSize()) {
+        throw std::invalid_argument("Vectors must have the same dimension!");
+    }
+    myVector::Vector<T> a_norm = a.normalize();
+    myVector::Vector<T> b_norm = b.normalize();
+    return a_norm + b_norm;
+}
+
+template<typename T>
+myVector::Vector<std::complex<T>> vectorBisector(const myVector::Vector<std::complex<T>>& a, const myVector::Vector<std::complex<T>>& b) {
+    if (a.getSize() != b.getSize()) {
+        throw std::invalid_argument("Vectors must have the same dimension!");
+    }
+    myVector::Vector<std::complex<T>> a_norm = a.normalize();
+    myVector::Vector<std::complex<T>> b_norm = b.normalize();
+    return a_norm + b_norm;
+}
+
+
 int main() {
+    double arr1[] = { 1.0, 2.0, 3.0 };
+    double arr2[] = { 2.0, 1.0, 1.0 };
+    myVector::Vector<double> v1(3, arr1);
+    myVector::Vector<double> v2(3, arr2);
+
+    auto bis = vectorBisector(v1, v2);
+    cout << "Vector bisector = " << bis;
+
     std::complex<double> c1[] = { {1.0, 2.0}, {3.0, 4.0} };
     std::complex<double> c2[] = { {1.0, 1.0}, {3.0, 0.0} };
     myVector::Vector<std::complex<double>> cv1(2, c1);
     myVector::Vector<std::complex<double>> cv2(2, c2);
 
-    cout << "Complex v1: " << cv1;
-    cout << "Complex v2: " << cv2;
-    cout << "cv1 + cv2 = " << (cv1 + cv2);
-    cout << "Dot product cv1 * cv2 = " << (cv1 * cv2) << endl;
-    cout << "Norm of cv1: " << cv1.norm() << endl;
+    auto cbis = vectorBisector(cv1, cv2);
+    cout << "Complex vector bisector = " << cbis;
 
     return 0;
 }
