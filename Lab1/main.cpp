@@ -108,6 +108,39 @@ namespace myVector {
             return first;
         }
 
+        // add comparison operators and vector normalization
+        friend bool operator==(const Vector& first, const Vector& second) {
+            if (first.size != second.size) return false;
+            for (size_t i = 0; i < first.size; i++) {
+                if (abs(first[i] - second[i]) > EPS) return false;
+            }
+            return true;
+        }
+        friend bool operator!=(const Vector& first, const Vector& second) {
+            return !(first == second);
+        }
+
+        T getLength() const {
+            T sum = T();
+            for (size_t i = 0; i < size; i++) {
+                sum += data[i] * data[i];
+            }
+            return sqrt(abs(sum));
+        }
+
+        Vector normalize() const {
+            T n = getLength();
+            if (n < EPS) {
+                throw std::invalid_argument("Cannot normalize zero vector!");
+            }
+            Vector result(size);
+            for (size_t i = 0; i < size; i++) {
+                result[i] = data[i] / n;
+            }
+            return result;
+        }
+
+
     };
 
     template<typename T>
@@ -120,15 +153,20 @@ namespace myVector {
 }
 
 int main() {
-    double arr1[] = { 1.0, 2.0, 3.0 };
-    double arr2[] = { 4.0, 5.0, 6.0 };
+    double arr1[] = { 1.0, 2.0, 2.0 };
+    double arr2[] = { 1.0, 2.0, 2.0 };
+    double arr3[] = { 1.0, 2.0, 3.0 };
     myVector::Vector<double> v1(3, arr1);
     myVector::Vector<double> v2(3, arr2);
+    myVector::Vector<double> v3(3, arr3);
 
-    cout << "v1 * 2.0 = " << (v1 * 2.0);
-    cout << "3.0 * v1 = " << (3.0 * v1);
-    cout << "v1 / 2.0 = " << (v1 / 2.0);
-    cout << "Dot product v1 * v2 = " << (v1 * v2) << endl;
+    cout << "v1 == v2: " << (v1 == v2) << endl;
+    cout << "v1 == v3: " << (v1 == v3) << endl;
+    cout << "Length of v1: " << v1.getLength() << endl;
+
+    auto normalized = v1.normalize();
+    cout << "Normalized v1: " << normalized;
+    cout << "Length of normalized: " << normalized.getLength() << endl;
 
     return 0;
 }
