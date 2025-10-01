@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include<complex>
 using namespace std;
 
 namespace myVector {
@@ -152,21 +153,118 @@ namespace myVector {
     }
 }
 
+
+namespace myVector {
+    template<class T>
+    class Vector<std::complex<T>> {
+    private:
+        std::complex<T>* data;
+        size_t size;
+
+    public:
+        static constexpr double EPS = 1e-8;
+
+        Vector() : data(nullptr), size(0) {}
+        Vector(size_t n, const std::complex<T>* init) : data(new std::complex<T>[n]), size(n) {
+            for (size_t i = 0; i < size; ++i) data[i] = init[i];
+        }
+        Vector(size_t n, const std::complex<T>& fillValue = std::complex<T>()) : data(new std::complex<T>[n]), size(n) {
+            for (size_t i = 0; i < size; i++) {
+                data[i] = fillValue;
+            }
+        }
+        Vector(const Vector<std::complex<T>>& other) : data(new std::complex<T>[other.size]), size(other.size) {
+            for (size_t i = 0; i < size; i++) {
+                data[i] = other.data[i];
+            }
+        }
+        Vector& operator=(const Vector<std::complex<T>>& other) {
+            if (this != &other) {
+                delete[] data;
+                size = other.size;
+                data = new std::complex<T>[size];
+                for (size_t i = 0; i < size; i++) {
+                    data[i] = other.data[i];
+                }
+            }
+            return *this;
+        }
+        ~Vector() { delete[] data; }
+
+        std::complex<T>& operator[](size_t i) {
+            if (i >= size) throw std::out_of_range("Invalid value!");
+            return data[i];
+        }
+        const std::complex<T>& operator[](size_t i) const {
+            if (i >= size) throw std::out_of_range("Invalid value!");
+            return data[i];
+        }
+
+        Vector<std::complex<T>>& operator+=(const Vector<std::complex<T>>& second) {
+            if (second.size != this->size) throw std::invalid_argument("Unequal lengths");
+            for (size_t i = 0; i < size; ++i) this->data[i] += second.data[i];
+            return *this;
+        }
+        friend Vector<std::complex<T>> operator+(Vector<std::complex<T>> first, const Vector<std::complex<T>>& second) {
+            first += second;
+            return first;
+        }
+
+        Vector<std::complex<T>>& operator-=(const Vector<std::complex<T>>& other) {
+            if (other.size != this->size) throw std::invalid_argument("Unequal lengths!");
+            for (size_t i = 0; i < size; i++) this->data[i] -= other.data[i];
+            return *this;
+        }
+        friend Vector<std::complex<T>> operator-(Vector<std::complex<T>> first, const Vector<std::complex<T>> second) {
+            first -= second;
+            return first;
+        }
+
+        friend std::complex<T> operator*(const Vector<std::complex<T>>& first, const Vector<std::complex<T>>& second) {
+            if (first.size != second.size) throw std::invalid_argument("Unequal lengths!");
+            std::complex<T> result = { T(), T() };
+            for (size_t i = 0; i < first.size; i++) {
+                result += (std::conj(first[i])) * second[i];
+            }
+            return result;
+        }
+
+        double norm() const {
+            std::complex<T> sum = std::complex<T>();
+            for (size_t i = 0; i < size; i++) {
+                sum += data[i] * std::conj(data[i]);
+            }
+            return sqrt(abs(sum));
+        }
+
+        size_t getSize() const { return size; }
+
+        template<typename U>
+        friend std::ostream& operator<<(std::ostream& os, const Vector<std::complex<U>>& v);
+    };
+
+    template<typename T>
+    std::ostream& operator<<(std::ostream& os, const Vector<std::complex<T>>& vec) {
+        os << "{";
+        for (size_t i = 0; i < vec.size; i++) {
+            os << vec[i] << " ";
+        }
+        os << "}\n";
+        return os;
+    }
+}
+
 int main() {
-    double arr1[] = { 1.0, 2.0, 2.0 };
-    double arr2[] = { 1.0, 2.0, 2.0 };
-    double arr3[] = { 1.0, 2.0, 3.0 };
-    myVector::Vector<double> v1(3, arr1);
-    myVector::Vector<double> v2(3, arr2);
-    myVector::Vector<double> v3(3, arr3);
+    std::complex<double> c1[] = { {1.0, 2.0}, {3.0, 4.0} };
+    std::complex<double> c2[] = { {1.0, 1.0}, {3.0, 0.0} };
+    myVector::Vector<std::complex<double>> cv1(2, c1);
+    myVector::Vector<std::complex<double>> cv2(2, c2);
 
-    cout << "v1 == v2: " << (v1 == v2) << endl;
-    cout << "v1 == v3: " << (v1 == v3) << endl;
-    cout << "Length of v1: " << v1.getLength() << endl;
-
-    auto normalized = v1.normalize();
-    cout << "Normalized v1: " << normalized;
-    cout << "Length of normalized: " << normalized.getLength() << endl;
+    cout << "Complex v1: " << cv1;
+    cout << "Complex v2: " << cv2;
+    cout << "cv1 + cv2 = " << (cv1 + cv2);
+    cout << "Dot product cv1 * cv2 = " << (cv1 * cv2) << endl;
+    cout << "Norm of cv1: " << cv1.norm() << endl;
 
     return 0;
 }
