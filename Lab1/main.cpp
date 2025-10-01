@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include<complex>
+#include<random>
 using namespace std;
 
 namespace myVector {
@@ -22,6 +23,13 @@ namespace myVector {
             for (size_t i = 0; i < size; ++i)
                 data[i] = fillValue;
         }
+        Vector(size_t n, double minValue, double maxValue) : data(new T[n]), size(n) {
+            std::random_device rd;
+            std::mt19937 gen(rd());  
+            std::uniform_real_distribution<T> dist(minValue, maxValue);
+            for (size_t i = 0; i < size; i++) data[i] = dist(gen);
+        }
+
         Vector(const Vector& other) : data(new T[other.size]), size(other.size) {
             for (size_t i = 0; i < size; ++i) data[i] = other.data[i];
         }
@@ -173,6 +181,15 @@ namespace myVector {
                 data[i] = fillValue;
             }
         }
+        // SỬA THÀNH:
+        Vector(size_t n, T minValue, T maxValue) : data(new std::complex<T>[n]), size(n) {
+            std::random_device rd;
+            std::mt19937 gen(rd());  // Đổi 're' thành 'gen'
+            std::uniform_real_distribution<T> dist(minValue, maxValue);
+            for (size_t i = 0; i < size; i++) {
+                data[i] = std::complex<T>(dist(gen), dist(gen));
+            }
+        }
         Vector(const Vector<std::complex<T>>& other) : data(new std::complex<T>[other.size]), size(other.size) {
             for (size_t i = 0; i < size; i++) {
                 data[i] = other.data[i];
@@ -218,6 +235,47 @@ namespace myVector {
         friend Vector<std::complex<T>> operator-(Vector<std::complex<T>> first, const Vector<std::complex<T>> second) {
             first -= second;
             return first;
+        }
+
+        Vector<std::complex<T>>& operator*=(const T& value) {
+            for (size_t i = 0; i < size; i++) {
+                data[i] *= value;
+            }
+            return *this;
+        }
+        friend Vector<std::complex<T>> operator*(Vector<std::complex<T>> first, const T& value) {
+            first *= value;
+            return first;
+        }
+        friend Vector<std::complex<T>> operator*(const T& value, Vector<std::complex<T>> first) {
+            first *= value;
+            return first;
+        }
+
+        Vector<std::complex<T>>& operator/=(const T& value) {
+            if (abs(value) < EPS) {
+                throw std::invalid_argument("The denominator must not be equal to 0");
+            }
+            for (size_t i = 0; i < size; i++) {
+                data[i] /= value;
+            }
+            return *this;
+        }
+        friend Vector<std::complex<T>> operator/(Vector<std::complex<T>> first, const T& value) {
+            first /= value;
+            return first;
+        }
+
+        friend bool operator==(const Vector<std::complex<T>>& first, const Vector<std::complex<T>>& second) {
+            if (first.size != second.size) return false;
+            for (size_t i = 0; i < first.size; i++) {
+                if ((abs(first[i].real() - second[i].real())) > EPS ||
+                    (abs(first[i].imag() - second[i].imag())) > EPS) return false;
+            }
+            return true;
+        }
+        friend bool operator!=(const Vector<std::complex<T>> first, const Vector<std::complex<T>> second) {
+            return !(first == second);
         }
 
         friend std::complex<T> operator*(const Vector<std::complex<T>>& first, const Vector<std::complex<T>>& second) {
@@ -290,21 +348,39 @@ myVector::Vector<std::complex<T>> vectorBisector(const myVector::Vector<std::com
 
 
 int main() {
-    double arr1[] = { 1.0, 2.0, 3.0 };
+    // Test vectors real
+    double arr1[] = { 1.0, 2.4, 3.2 };
     double arr2[] = { 2.0, 1.0, 1.0 };
     myVector::Vector<double> v1(3, arr1);
     myVector::Vector<double> v2(3, arr2);
 
+    cout << "=== REAL VECTOR TESTS ===" << endl;
+    cout << "v1: " << v1;
+    cout << "v2: " << v2;
+    cout << "Dot product v1 * v2 = " << (v1 * v2) << endl;
+    cout << "v1 + v2 = " << (v1 + v2);
+    cout << "v1 - v2 = " << (v1 - v2);
+    cout << "v1 * 2.1 = " << (v1 * 2.1);
+
     auto bis = vectorBisector(v1, v2);
     cout << "Vector bisector = " << bis;
 
+    // Test vectors complex
     std::complex<double> c1[] = { {1.0, 2.0}, {3.0, 4.0} };
     std::complex<double> c2[] = { {1.0, 1.0}, {3.0, 0.0} };
     myVector::Vector<std::complex<double>> cv1(2, c1);
     myVector::Vector<std::complex<double>> cv2(2, c2);
 
+    cout << "\n=== COMPLEX VECTOR TESTS ===" << endl;
+    cout << "cv1: " << cv1;
+    cout << "cv2: " << cv2;
     auto cbis = vectorBisector(cv1, cv2);
-    cout << "Complex vector bisector = " << cbis;
+    cout << "Vector bisector complex = " << cbis;
+
+    // Test vector random
+    cout << "\n=== RANDOM VECTOR TESTS ===" << endl;
+    myVector::Vector<double> randomVec(3, -5.0, 5.0);
+    cout << "Random vector: " << randomVec;
 
     return 0;
 }
